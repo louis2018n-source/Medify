@@ -255,6 +255,15 @@
 
 <div class="container">
 
+  <div id="api-section" class="api-notice">
+    🔑 <strong>One quick setup:</strong> Medify needs an Anthropic API key to work its magic!
+    Get one free at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>
+    <br/>
+    <input type="password" id="api-key-input" placeholder="Paste your key here: sk-ant-..." />
+    <br/>
+    <button class="api-save-btn" onclick="saveKey()">Save &amp; Start Exploring! 🚀</button>
+  </div>
+
   <div class="section-title">🫀 Body Systems</div>
   <div class="systems-grid" id="systems-grid">
     <div class="sys-card" data-color="purple" onclick="quickSearch('Nervous system brain visual auditory senses eyes ears')">
@@ -394,9 +403,9 @@ function proceedRepro() {
 }
 
 (function init() {
-  // Hide setup screen if key is already available
-  // key hardcoded — no setup needed
-
+  if (API_KEY && API_KEY.length > 10) {
+    document.getElementById('api-section').style.display = 'none';
+  }
 })();
 
 function saveKey() {
@@ -404,6 +413,8 @@ function saveKey() {
   if (!val || val.length < 20) { alert('Please paste your full Anthropic API key'); return; }
   API_KEY = val;
   storageSave('medify_api_key', val);
+  document.getElementById('api-section').style.display = 'none';
+  alert('✅ Key saved! Now tap any body system to explore!');
 }
 
 document.getElementById('search-input').addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
