@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Medify — Body Explorer for Kids</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --yellow:   #FFD93D;
+    --orange:   #FF6B35;
+    --pink:     #FF6B9D;
+    --purple:   #9B5DE5;
+    --blue:     #4ECDC4;
+    --green:    #6BCB77;
+    --red:      #FF595E;
+    --bg:       #EBF5FB;
+    --surface:  #FFFFFF;
+    --text:     #2D2D2D;
+    --text2:    #6B6B6B;
+    --radius:   16px;
+    --radius-lg: 24px;
+  }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .topbar {
+    background: #2E86C1;
+    padding: 0 2rem;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .logo-circle {
+    width: 42px; height: 42px;
+    background: var(--yellow);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .app-name {
+    font-size: 22px; font-weight: 900;
+    color: white; letter-spacing: -0.02em;
+  }
+  .app-sub {
+    font-size: 13px; color: rgba(255,255,255,0.75);
+    font-weight: 600; margin-left: 2px;
+  }
+
+  /* HERO BANNER */
+  .hero {
+    background: linear-gradient(135deg, #2E86C1 0%, #4ECDC4 50%, #48C9B0 100%);
+    padding: 2.5rem 2rem 3rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-emoji { font-size: 56px; display: block; margin-bottom: 12px; animation: bounce 2s infinite; }
+  @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+  .hero h1 { font-size: 28px; font-weight: 900; color: white; margin-bottom: 8px; }
+  .hero p  { font-size: 15px; color: rgba(255,255,255,0.88); font-weight: 600; }
+
+  /* SEARCH */
+  .search-wrap { max-width: 680px; margin: -24px auto 0; padding: 0 1.5rem; position: relative; z-index: 2; }
+  .search-row { display: flex; gap: 8px; background: white; border-radius: var(--radius-lg); padding: 8px; box-shadow: 0 8px 32px rgba(46,134,193,0.2); }
+  .search-row input {
+    flex: 1; height: 44px; padding: 0 16px;
+    border: none; outline: none;
+    font-size: 15px; font-family: 'Nunito', sans-serif; font-weight: 600;
+    color: var(--text); background: transparent;
+  }
+  .search-row input::placeholder { color: #bbb; font-weight: 600; }
+  .search-row button {
+    height: 44px; padding: 0 22px;
+    background: #2E86C1; color: white;
+    border: none; border-radius: 14px;
+    font-size: 14px; font-weight: 800; font-family: 'Nunito', sans-serif;
+    cursor: pointer; white-space: nowrap;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .search-row button:hover { background: #1A6FA0; }
+  .search-row button:active { transform: scale(0.97); }
+
+  /* MAIN */
+  .container { max-width: 720px; margin: 0 auto; padding: 2rem 1.5rem 3rem; }
+
+  /* BODY SYSTEM CARDS GRID */
+  .section-title {
+    font-size: 17px; font-weight: 800; color: var(--text);
+    margin: 1.5rem 0 1rem; display: flex; align-items: center; gap: 8px;
+  }
+  .systems-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 2rem;
+  }
+  .sys-card {
+    background: white;
+    border-radius: var(--radius);
+    padding: 1rem 0.75rem;
+    text-align: center;
+    cursor: pointer;
+    border: 2.5px solid transparent;
+    transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+  }
+  .sys-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+  .sys-card.active { border-color: #2E86C1; box-shadow: 0 0 0 4px rgba(46,134,193,0.15); }
+  .sys-emoji { font-size: 36px; display: block; margin-bottom: 8px; }
+  .sys-name { font-size: 12px; font-weight: 900; color: var(--text); line-height: 1.3; }
+  .sys-desc { font-size: 11px; color: var(--text2); margin-top: 4px; font-weight: 600; line-height: 1.3; }
+  .sys-organs { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(0,0,0,0.07); }
+  .sys-organ-tag { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 20px; background: rgba(0,0,0,0.06); color: var(--text2); }
+
+  /* COLOR DOTS per system */
+  .sys-card[data-color="red"]    { background: #FDEEF0; }
+  .sys-card[data-color="blue"]   { background: #E8F4FD; }
+  .sys-card[data-color="green"]  { background: #E8F8EF; }
+  .sys-card[data-color="purple"] { background: #F0EAFA; }
+  .sys-card[data-color="orange"] { background: #FEF0E8; }
+  .sys-card[data-color="yellow"] { background: #FEF8E3; }
+  .sys-card[data-color="pink"]   { background: #FDEEF6; }
+  .sys-card[data-color="teal"]   { background: #E6F9F7; }
+
+  /* RESULT */
+  #result-area { margin-top: 0.5rem; }
+  .result-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: 1.75rem;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    animation: popIn 0.25s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes popIn { from{opacity:0;transform:scale(0.95)} to{opacity:1;transform:scale(1)} }
+
+  .result-top { display: flex; align-items: flex-start; gap: 1.25rem; margin-bottom: 1.25rem; }
+  .result-icon {
+    width: 80px; height: 80px; flex-shrink: 0;
+    border-radius: 20px; font-size: 44px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .result-title { font-size: 22px; font-weight: 900; margin-bottom: 6px; }
+  .result-sub   { font-size: 13px; font-weight: 700; color: var(--text2); }
+
+  .fun-fact {
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.25rem;
+    font-size: 14px; font-weight: 700; line-height: 1.6;
+  }
+  .fun-fact strong { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; display: block; margin-bottom: 4px; }
+
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1.25rem; }
+  .info-box { border-radius: var(--radius); padding: 1rem; }
+  .info-label { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 6px; opacity: 0.7; }
+  .info-val { font-size: 13px; font-weight: 700; line-height: 1.55; }
+
+  .organs-row { margin-bottom: 1.25rem; }
+  .organs-title { font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text2); margin-bottom: 10px; }
+  .organ-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+  .organ-pill {
+    font-size: 13px; font-weight: 700; padding: 6px 14px;
+    border-radius: 20px; cursor: pointer;
+    transition: transform 0.1s;
+  }
+  .organ-pill:hover { transform: scale(1.06); }
+
+  .superpower {
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    font-size: 14px; font-weight: 700; line-height: 1.6;
+  }
+  .superpower strong { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; display: block; margin-bottom: 4px; }
+
+  /* LOADING */
+  .loading { text-align: center; padding: 3rem 1rem; }
+  .load-emoji { font-size: 48px; animation: spin 1s linear infinite; display: block; margin-bottom: 12px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .load-text { font-size: 15px; font-weight: 700; color: var(--text2); }
+
+  .error-box {
+    background: #FFF0F0; color: #C0392B;
+    border-radius: var(--radius); padding: 1rem 1.25rem;
+    font-size: 14px; font-weight: 700;
+    border: 2px solid #FFD5D5;
+  }
+
+  /* API KEY */
+  .api-notice {
+    background: #EBF5FB; border: 2px solid #AED6F1;
+    border-radius: var(--radius); padding: 1.25rem;
+    font-size: 14px; font-weight: 700; line-height: 1.65;
+    margin-bottom: 1.5rem; color: #1A5276;
+  }
+  .api-notice a { color: #2E86C1; }
+  .api-notice input {
+    margin-top: 10px; width: 100%; height: 40px; padding: 0 14px;
+    border: 2px solid #AED6F1; border-radius: 10px;
+    background: white; color: var(--text);
+    font-size: 13px; font-family: monospace; outline: none;
+  }
+  .api-notice input:focus { border-color: #2E86C1; }
+  .api-save-btn {
+    margin-top: 10px; height: 38px; padding: 0 20px;
+    background: #2E86C1; color: white;
+    border: none; border-radius: 10px;
+    font-size: 14px; font-weight: 800; font-family: 'Nunito', sans-serif;
+    cursor: pointer;
+  }
+
+  .disclaimer {
+    font-size: 12px; color: var(--text2); font-weight: 600;
+    text-align: center; margin-top: 2rem; line-height: 1.6;
+  }
+
+  @media (max-width: 500px) {
+    .info-grid { grid-template-columns: 1fr; }
+    .result-top { flex-direction: column; align-items: center; text-align: center; }
+    .systems-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo-circle">🫀</div>
+  <div>
+    <div class="app-name">Medify</div>
+    <div class="app-sub">Body Explorer for Kids</div>
+  </div>
+</div>
+
+<div class="hero">
+  <span class="hero-emoji">🔬</span>
+  <h1>Deep dive into the human body!</h1>
+  <p>Tap a body system or search to learn how YOU work!</p>
+</div>
+
+<div class="search-wrap">
+  <div class="search-row">
+    <input type="text" id="search-input" placeholder="Search a system or organ (e.g. liver, femur, cornea...)" />
+    <button onclick="doSearch()">🔍 Explore!</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="section-title">🫀 Body Systems</div>
+  <div class="systems-grid" id="systems-grid">
+    <div class="sys-card" data-color="purple" onclick="quickSearch('Nervous system brain visual auditory senses eyes ears')">
+      <span class="sys-emoji">🧠</span>
+      <div class="sys-name">Nervous System</div>
+      <div class="sys-desc">Brain, eyes &amp; ears — your senses!</div>
+      <div class="sys-organs"><span class="sys-organ-tag">Brain</span><span class="sys-organ-tag">Spinal cord</span><span class="sys-organ-tag">Eyes</span><span class="sys-organ-tag">Ears</span></div>
+    </div>
+    <div class="sys-card" data-color="red" onclick="quickSearch('Cardiovascular system heart')">
+      <span class="sys-emoji">❤️</span>
+      <div class="sys-name">Cardiovascular System</div>
+      <div class="sys-desc">Pumps blood around your body</div>
+      <div class="sys-organs"><span class="sys-organ-tag">Heart</span><span class="sys-organ-tag">Arteries</span><span class="sys-organ-tag">Veins</span><span class="sys-organ-tag">Blood</span></div>
+    </div>
+    <div class="sys-card" data-color="blue" onclick="quickSearch('Respiratory system lungs breathing')">
+      <span class="sys-emoji">🫁</span>
+      <div class="sys-name">Respiratory System</div>
+      <div class="sys-desc">Brings oxygen into your body</div>
+      <div class="sys-organs"><span class="sys-organ-tag">Lungs</span><span class="sys-organ-tag">Trachea</span><span class="sys-organ-tag">Diaphragm</span><span class="sys-organ-tag">Bronchi</span></div>
+    </div>
+    <div class="sys-card" data-color="green" onclick="quickSearch('Digestive system stomach intestines')">
+      <span class="sys-emoji">🥗</span>
+      <div class="sys-name">Digestive System</div>
+      <div class="sys-desc">Breaks food into energy</div>
+      <div class="sys-organs"><span class="sys-organ-tag">Stomach</span><span class="sys-organ-tag">Intestines</span><span class="sys-organ-tag">Liver</span><span class="sys-organ-tag">Pancreas</span></div>
+    </div>
+    <div class="sys-card" data-color="yellow" onclick="quickSearch('Skeletal system bones')">
+      <span class="sys-emoji">🦴</span>
+      <div class="sys-name">Skeletal System</div>
+      <div class="sys-desc">Bones that hold you up</div>
+      <div class="sys-organs"><span class="sys-organ-tag">Skull</span><span class="sys-organ-tag">Spine</span><span class="sys-organ-tag">Ribs</span><span class="sys-organ-tag">Femur</span></div>
+    </div>
+    <div class="sys-card" data-color="orange" onclick="quickSearch('Muscular system muscles')">
+      <span class="sys-emoji">💪</span>
+      <div class="sys-name">Muscular System</div>
+      <div class="sys-desc">Muscles that make you move</div>
+      <div class="sys-organs"><span class="sys-organ-tag">Biceps</span><span class="sys-organ-tag">Quadriceps</span><span class="sys-organ-tag">Hamstrings</span><span class="sys-organ-tag">Tendons</span></div>
+    </div>
+    <div class="sys-card" data-color="teal" onclick="quickSearch('Immune system white blood cells defense')">
+      <span class="sys-emoji">🛡️</span>
+      <div class="sys-name">Immune System</div>
+      <div class="sys-desc">Fights off germs and illness</div>
+      <div class="sys-organs"><span class="sys-organ-tag">Lymph nodes</span><span class="sys-organ-tag">Spleen</span><span class="sys-organ-tag">Bone marrow</span><span class="sys-organ-tag">Thymus</span></div>
+    </div>
+    <div class="sys-card" data-color="pink" onclick="quickSearch('Integumentary system skin hair nails')">
+      <span class="sys-emoji">🩹</span>
+      <div class="sys-name">Integumentary System</div>
+      <div class="sys-desc">Skin, hair and nails</div>
+      <div class="sys-organs"><span class="sys-organ-tag">Skin</span><span class="sys-organ-tag">Hair</span><span class="sys-organ-tag">Nails</span><span class="sys-organ-tag">Sweat glands</span></div>
+    </div>
+    <div class="sys-card" data-color="yellow" onclick="quickSearch('Endocrine system hormones glands')">
+      <span class="sys-emoji">⚗️</span>
+      <div class="sys-name">Endocrine System</div>
+      <div class="sys-desc">Sends chemical messages</div>
+      <div class="sys-organs"><span class="sys-organ-tag">Thyroid</span><span class="sys-organ-tag">Adrenal glands</span><span class="sys-organ-tag">Pancreas</span><span class="sys-organ-tag">Pituitary</span></div>
+    </div>
+    <div class="sys-card" data-color="blue" onclick="quickSearch('Urinary system kidneys bladder')">
+      <span class="sys-emoji">💧</span>
+      <div class="sys-name">Urinary System</div>
+      <div class="sys-desc">Cleans your blood, makes urine</div>
+      <div class="sys-organs"><span class="sys-organ-tag">Kidneys</span><span class="sys-organ-tag">Bladder</span><span class="sys-organ-tag">Ureters</span><span class="sys-organ-tag">Urethra</span></div>
+    </div>
+    <div class="sys-card" data-color="pink" onclick="showReproWarning()" style="position:relative">
+      <span class="sys-emoji">🌸</span>
+      <div class="sys-name">Reproductive System</div>
+      <div class="sys-desc">How life begins</div>
+      <div class="sys-organs"><span class="sys-organ-tag">Ovaries</span><span class="sys-organ-tag">Uterus</span><span class="sys-organ-tag">Testes</span><span class="sys-organ-tag">Fallopian tubes</span></div>
+      <div style="position:absolute;top:8px;right:8px;background:#FF6B9D;color:white;font-size:10px;font-weight:900;padding:2px 7px;border-radius:20px;">12+</div>
+    </div>
+  </div>
+
+
+
+  <div id="repro-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:100;align-items:center;justify-content:center;padding:1.5rem;">
+    <div style="background:white;border-radius:24px;padding:2rem;max-width:360px;width:100%;text-align:center;box-shadow:0 16px 48px rgba(0,0,0,0.2);">
+      <div style="font-size:48px;margin-bottom:12px;">🌸</div>
+      <div style="font-size:19px;font-weight:900;color:#2D2D2D;margin-bottom:8px;">Heads up!</div>
+      <p style="font-size:14px;font-weight:600;color:#6B6B6B;line-height:1.6;margin-bottom:20px;">
+        This section covers the <strong>Reproductive System</strong> and is recommended for ages <strong>12 and up</strong>.<br/><br/>
+        It explains how the human body creates new life — best explored with a parent, guardian, or teacher nearby!
+      </p>
+      <div style="display:flex;gap:10px;justify-content:center;">
+        <button onclick="closeReproWarning()" style="height:42px;padding:0 20px;background:#f0f0f0;color:#444;border:none;border-radius:12px;font-size:14px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;">Go back</button>
+        <button onclick="proceedRepro()" style="height:42px;padding:0 20px;background:#FF6B9D;color:white;border:none;border-radius:12px;font-size:14px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;">I'm 12+ — Let's learn! 🚀</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="result-area"></div>
+
+  <div style="margin-top:1.5rem;">
+    <div class="section-title" style="margin-bottom:0.75rem;">🔎 Or search by organ</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;">
+      <button class="chip" onclick="quickSearch('Liver')">🟤 Liver</button>
+      <button class="chip" onclick="quickSearch('Kidney')">🫘 Kidney</button>
+      <button class="chip" onclick="quickSearch('Femur')">🦴 Femur</button>
+      <button class="chip" onclick="quickSearch('Cornea')">👁️ Cornea</button>
+      <button class="chip" onclick="quickSearch('Stomach')">🫙 Stomach</button>
+      <button class="chip" onclick="quickSearch('Pancreas')">🩺 Pancreas</button>
+      <button class="chip" onclick="quickSearch('Spleen')">🛡️ Spleen</button>
+      <button class="chip" onclick="quickSearch('Thyroid')">⚗️ Thyroid</button>
+      <button class="chip" onclick="quickSearch('Cochlea')">👂 Cochlea</button>
+      <button class="chip" onclick="quickSearch('Cerebellum')">🧠 Cerebellum</button>
+      <button class="chip" onclick="quickSearch('Aorta')">❤️ Aorta</button>
+      <button class="chip" onclick="quickSearch('Diaphragm')">🫁 Diaphragm</button>
+    </div>
+  </div>
+
+  <p class="disclaimer">🩺 Medify is for learning — always talk to a real doctor with health questions!</p>
+</div>
+
+<script>
+let API_KEY = '';
+
+// Safe storage helpers — localStorage fails on iPhone with local files
+function storageSave(key, val) {
+  try { localStorage.setItem(key, val); } catch(e) {}
+}
+function storageGet(key) {
+  try { return localStorage.getItem(key) || ''; } catch(e) { return ''; }
+}
+
+// Use hardcoded key if present, otherwise try storage
+if (!API_KEY) API_KEY = storageGet('medify_api_key');
+
+function showReproWarning() {
+  const m = document.getElementById('repro-modal');
+  m.style.display = 'flex';
+}
+function closeReproWarning() {
+  document.getElementById('repro-modal').style.display = 'none';
+}
+function proceedRepro() {
+  closeReproWarning();
+  document.getElementById('search-input').value = 'Reproductive system';
+  doSearch();
+}
+
+(function init() {
+  // Hide setup screen if key is already available
+  // key hardcoded — no setup needed
+
+})();
+
+function saveKey() {
+  const val = document.getElementById('api-key-input').value.trim();
+  if (!val || val.length < 20) { alert('Please paste your full Anthropic API key'); return; }
+  API_KEY = val;
+  storageSave('medify_api_key', val);
+}
+
+document.getElementById('search-input').addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
+
+function quickSearch(term) {
+  document.getElementById('search-input').value = term;
+  document.querySelectorAll('.sys-card').forEach(c => c.classList.remove('active'));
+  event.currentTarget && event.currentTarget.classList && event.currentTarget.classList.add('active');
+  doSearch();
+}
+
+const COLORS = {
+  red:    { bg:'#FFF0F0', accent:'#FF595E', text:'#8B0000', pill:'#FFD5D5', pillText:'#8B0000' },
+  blue:   { bg:'#F0FAFF', accent:'#4ECDC4', text:'#004D6B', pill:'#C0EFFF', pillText:'#004D6B' },
+  green:  { bg:'#F0FFF4', accent:'#6BCB77', text:'#1A5C2A', pill:'#C0F0CB', pillText:'#1A5C2A' },
+  purple: { bg:'#F8F0FF', accent:'#9B5DE5', text:'#4B0082', pill:'#E0C8FF', pillText:'#4B0082' },
+  orange: { bg:'#FFF5F0', accent:'#FF6B35', text:'#8B3000', pill:'#FFD5B8', pillText:'#8B3000' },
+  yellow: { bg:'#FFFBF0', accent:'#FFD93D', text:'#7A5C00', pill:'#FFF0A0', pillText:'#7A5C00' },
+  pink:   { bg:'#FFF0F8', accent:'#FF6B9D', text:'#8B0050', pill:'#FFD0E8', pillText:'#8B0050' },
+  teal:   { bg:'#F0FFFD', accent:'#4ECDC4', text:'#005C55', pill:'#B0F5F0', pillText:'#005C55' },
+};
+
+function pickColor(name) {
+  const n = (name||'').toLowerCase();
+  if (n.includes('heart') || n.includes('blood') || n.includes('cardio') || n.includes('eye')) return COLORS.red;
+  if (n.includes('lung') || n.includes('breath') || n.includes('kidney') || n.includes('urinary')) return COLORS.blue;
+  if (n.includes('brain') || n.includes('nerve') || n.includes('nervous')) return COLORS.purple;
+  if (n.includes('digest') || n.includes('stomach') || n.includes('intestine') || n.includes('liver')) return COLORS.green;
+  if (n.includes('muscle')) return COLORS.orange;
+  if (n.includes('bone') || n.includes('skeleton') || n.includes('hormone') || n.includes('endocrine')) return COLORS.yellow;
+  if (n.includes('skin') || n.includes('ear') || n.includes('hear')) return COLORS.pink;
+  if (n.includes('immune') || n.includes('lymph')) return COLORS.teal;
+  return COLORS.purple;
+}
+
+async function doSearch() {
+  const query = document.getElementById('search-input').value.trim();
+  if (!query) { alert('No query entered'); return; }
+  if (!API_KEY) { alert('No API key found!'); return; }
+
+
+  document.getElementById('result-area').innerHTML = `
+    <div class="loading">
+      <span class="load-emoji">⚙️</span>
+      <div class="load-text">Learning about ${query}...</div>
+    </div>`;
+
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": API_KEY,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true"
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 1000,
+        system: `You are a fun, enthusiastic science teacher for kids aged 7-14. The user may search for a full body system (e.g. "Digestive System") OR a single organ (e.g. "liver", "femur", "cornea"). Handle both gracefully. Return ONLY valid JSON, no markdown, no backticks, no extra text.
+
+Return this exact structure:
+{
+  "name": "Proper name of the system or organ (e.g. 'The Liver', 'The Nervous System')",
+  "belongs_to": "Which body system this belongs to, if it's an organ (e.g. 'Part of the Digestive System') — leave empty string if it IS a system",
+  "emoji": "single most fitting emoji for this system/organ",
+  "tagline": "short exciting 6-8 word tagline for kids",
+  "what_it_does": "2 simple sentences explaining what it does, using fun language a 10-year-old would love",
+  "fun_fact": "one amazing wow-worthy fun fact about this system/organ",
+  "superpower": "describe this system/organ's coolest ability in 1-2 sentences like it's a superpower",
+  "organs": ["related part 1", "related part 2", "related part 3", "related part 4"] — if it's a system list key organs; if it's an organ list key parts or related organs,
+  "jobs": "2 sentences on the main jobs this system/organ does every day",
+  "wow_number": "one impressive number stat (e.g. 'Your liver performs over 500 different jobs!')",
+  "color": "one of: red, blue, green, purple, orange, yellow, pink, teal — pick the best fit",
+  "health_tips": ["tip1", "tip2", "tip3"] — 3 short, fun, kid-friendly tips to keep this system/organ healthy,
+  "how_it_works": "3-4 sentences explaining the step-by-step science of how this works — written for curious students aged 12-14. Use proper scientific terms but explain them clearly.",
+  "diagram_image_url": "leave as empty string"
+}
+
+Make it fun, simple, exciting. Use exclamation marks! Make kids go WOW!`,
+        messages: [{ role: "user", content: query }]
+      })
+    });
+
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+    const text = data.content.map(i => i.text || '').join('');
+    // Strip markdown, find first { to last } to extract JSON cleanly
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('No JSON found in response');
+    const info = JSON.parse(jsonMatch[0]);
+    renderResult(info);
+    fetchDiagram(info.name);
+  } catch(e) {
+    const msg = e.message || 'Unknown error';
+    alert('Error: ' + msg);
+    document.getElementById('result-area').innerHTML =
+      `<div class="error-box">😬 ${msg}</div>`;
+  }
+}
+
+async function fetchDiagram(systemName) {
+  const box = document.getElementById('diagram-box');
+  if (!box) return;
+
+  const lower = systemName.toLowerCase();
+
+  const termMap = [
+    { key: 'cardiovascular',  terms: ['Circulatory system', 'Heart', 'Human heart'] },
+    { key: 'respiratory',     terms: ['Respiratory system', 'Human lung', 'Lung'] },
+    { key: 'digestive',       terms: ['Human digestive system', 'Digestive system', 'Gastrointestinal tract'] },
+    { key: 'skeletal',        terms: ['Human skeleton', 'Skeleton', 'Skeletal system'] },
+    { key: 'muscular',        terms: ['Muscular system', 'Human musculoskeletal system', 'Muscle'] },
+    { key: 'nervous',         terms: ['Nervous system', 'Human brain', 'Central nervous system'] },
+    { key: 'immune',          terms: ['Immune system', 'Lymphatic system', 'White blood cell'] },
+    { key: 'integumentary',   terms: ['Skin', 'Integumentary system', 'Human skin'] },
+    { key: 'endocrine',       terms: ['Endocrine system', 'Human endocrine system', 'Thyroid'] },
+    { key: 'urinary',         terms: ['Urinary system', 'Human kidney', 'Kidney'] },
+    { key: 'reproductive',    terms: ['Human reproductive system', 'Reproductive system'] },
+    { key: 'visual',          terms: ['Human eye', 'Eye', 'Visual system'] },
+    { key: 'auditory',        terms: ['Ear', 'Human ear', 'Auditory system'] },
+    { key: 'liver',           terms: ['Liver', 'Human liver'] },
+    { key: 'kidney',          terms: ['Kidney', 'Human kidney'] },
+    { key: 'femur',           terms: ['Femur', 'Human femur'] },
+    { key: 'cornea',          terms: ['Cornea', 'Human eye'] },
+    { key: 'stomach',         terms: ['Stomach', 'Human stomach'] },
+    { key: 'pancreas',        terms: ['Pancreas', 'Human pancreas'] },
+    { key: 'spleen',          terms: ['Spleen', 'Human spleen'] },
+    { key: 'thyroid',         terms: ['Thyroid', 'Thyroid gland'] },
+    { key: 'cochlea',         terms: ['Cochlea', 'Inner ear', 'Ear'] },
+    { key: 'cerebellum',      terms: ['Cerebellum', 'Human brain', 'Brain'] },
+    { key: 'aorta',           terms: ['Aorta', 'Heart', 'Circulatory system'] },
+    { key: 'diaphragm',       terms: ['Thoracic diaphragm', 'Diaphragm', 'Respiratory system'] },
+    { key: 'brain',           terms: ['Human brain', 'Brain', 'Nervous system'] },
+    { key: 'heart',           terms: ['Human heart', 'Heart', 'Circulatory system'] },
+    { key: 'lung',            terms: ['Lung', 'Human lung', 'Respiratory system'] },
+    { key: 'intestine',       terms: ['Small intestine', 'Large intestine', 'Gastrointestinal tract'] },
+    { key: 'spine',           terms: ['Vertebral column', 'Spinal cord', 'Spine'] },
+    { key: 'skull',           terms: ['Skull', 'Human skull'] },
+    { key: 'rib',             terms: ['Rib', 'Human rib cage', 'Thoracic cage'] },
+    { key: 'bladder',         terms: ['Urinary bladder', 'Bladder', 'Urinary system'] },
+    { key: 'uterus',          terms: ['Uterus', 'Human uterus'] },
+    { key: 'ovary',           terms: ['Ovary', 'Human ovary'] },
+    { key: 'testis',          terms: ['Testicle', 'Human testis'] },
+    { key: 'lymph',           terms: ['Lymph node', 'Lymphatic system'] },
+    { key: 'thymus',          terms: ['Thymus', 'Immune system'] },
+    { key: 'adrenal',         terms: ['Adrenal gland', 'Endocrine system'] },
+    { key: 'pituitary',       terms: ['Pituitary gland', 'Endocrine system'] },
+    { key: 'retina',          terms: ['Retina', 'Human eye', 'Eye'] },
+    { key: 'trachea',         terms: ['Trachea', 'Respiratory system'] },
+    { key: 'esophagus',       terms: ['Esophagus', 'Gastrointestinal tract'] },
+    { key: 'appendix',        terms: ['Appendix', 'Gastrointestinal tract'] },
+    { key: 'gallbladder',     terms: ['Gallbladder', 'Digestive system'] },
+    { key: 'bicep',           terms: ['Biceps brachii muscle', 'Muscular system'] },
+    { key: 'tricep',          terms: ['Triceps brachii muscle', 'Muscular system'] },
+    { key: 'tendon',          terms: ['Tendon', 'Muscular system'] },
+    { key: 'bone marrow',     terms: ['Bone marrow', 'Immune system'] },
+  ];
+
+  let terms = [systemName];
+  for (const entry of termMap) {
+    if (lower.includes(entry.key)) { terms = entry.terms; break; }
+  }
+
+  for (const term of terms) {
+    try {
+      const res = await fetch(
+        'https://en.wikipedia.org/w/api.php?action=query&titles=' +
+        encodeURIComponent(term) +
+        '&prop=pageimages&format=json&pithumbsize=600&origin=*'
+      );
+      const data = await res.json();
+      const pages = data.query.pages;
+      const page = pages[Object.keys(pages)[0]];
+      if (page && page.thumbnail && page.thumbnail.source) {
+        const imgUrl = page.thumbnail.source;
+        box.innerHTML = '';
+        const img = document.createElement('img');
+        img.src = imgUrl;
+        img.alt = term + ' diagram';
+        img.style.cssText = 'max-width:100%;max-height:300px;object-fit:contain;border-radius:10px;display:block;margin:0 auto;';
+        img.onerror = function() {
+          this.parentNode.innerHTML = '<div style="text-align:center;padding:1rem;color:#6B7280;font-size:13px;font-weight:600;">📷 Image unavailable</div>';
+        };
+        const caption = document.createElement('div');
+        caption.style.cssText = 'font-size:10px;color:#6B7280;font-weight:600;margin-top:6px;text-align:center;';
+        caption.textContent = term + ' — via Wikipedia';
+        box.appendChild(img);
+        box.appendChild(caption);
+        return;
+      }
+    } catch(e) { continue; }
+  }
+
+  box.innerHTML = '<div style="text-align:center;padding:1rem;color:#6B7280;font-size:13px;font-weight:600;">📷 No diagram found</div>';
+}
+
+function renderResult(info) {
+  const c = COLORS[info.color] || pickColor(info.name);
+  const pillColors = ['#FF595E','#FF6B35','#FFD93D','#6BCB77','#4ECDC4','#9B5DE5','#FF6B9D'];
+  const organs = (info.organs || []).map((o, i) => {
+    const pc = pillColors[i % pillColors.length];
+    return `<span class="organ-pill" style="background:${pc}22;color:${pc};border:2px solid ${pc}44" onclick="document.getElementById('search-input').value='${o}';doSearch()">${o}</span>`;
+  }).join('');
+
+  document.getElementById('result-area').innerHTML = `
+    <div class="result-card">
+      <div class="result-top">
+        <div class="result-icon" style="background:${c.bg};font-size:44px">${info.emoji || '🔬'}</div>
+        <div>
+          <div class="result-title" style="color:${c.accent}">${info.name}</div>
+          ${info.belongs_to ? `<div style="font-size:11px;font-weight:800;background:${c.bg};color:${c.text};display:inline-block;padding:2px 10px;border-radius:20px;margin-bottom:4px;">${info.belongs_to}</div>` : ''}
+          <div class="result-sub">${info.tagline}</div>
+        </div>
+      </div>
+
+      <div class="fun-fact" style="background:${c.bg};color:${c.text}">
+        <strong>⭐ What does it do?</strong>
+        ${info.what_it_does}
+      </div>
+
+      <div class="info-grid">
+        <div class="info-box" style="background:${c.bg}">
+          <div class="info-label" style="color:${c.accent}">📋 Daily Jobs</div>
+          <div class="info-val" style="color:${c.text}">${info.jobs}</div>
+        </div>
+        <div class="info-box" style="background:#FFFBF0">
+          <div class="info-label" style="color:#BA8B00">🔢 Wow Number</div>
+          <div class="info-val" style="color:#7A5C00">${info.wow_number}</div>
+        </div>
+      </div>
+
+      ${organs ? `<div class="organs-row">
+        <div class="organs-title">🫀 Key Parts — tap to explore!</div>
+        <div class="organ-pills">${organs}</div>
+      </div>` : ''}
+
+      <div class="fun-fact" style="background:#FFF8E1;color:#7A5C00;margin-bottom:0.75rem">
+        <strong>🤩 Amazing Fun Fact!</strong>
+        ${info.fun_fact}
+      </div>
+
+      <div class="superpower" style="background:${c.bg};color:${c.text}">
+        <strong>🦸 Superpower!</strong>
+        ${info.superpower}
+      </div>
+
+      ${info.health_tips && info.health_tips.length ? `
+      <div style="margin-top:0.75rem;background:#E8F8EF;border-radius:16px;padding:1rem 1.25rem;">
+        <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.07em;color:#1A5C2A;margin-bottom:10px;">💚 Tips to keep it healthy!</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          ${info.health_tips.map(tip => `
+          <div style="display:flex;align-items:flex-start;gap:10px;background:white;border-radius:12px;padding:0.7rem 0.9rem;">
+            <span style="font-size:18px;flex-shrink:0;">✅</span>
+            <span style="font-size:13px;font-weight:700;color:#1A5C2A;line-height:1.5;">${tip}</span>
+          </div>`).join('')}
+        </div>
+      </div>` : ''}
+
+      ${info.how_it_works ? `
+      <div style="margin-top:0.75rem;background:#EEF2FF;border-radius:16px;padding:1rem 1.25rem;">
+        <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.07em;color:#3730A3;margin-bottom:10px;">🔬 How it works — for serious students!</div>
+        <div id="diagram-box" style="margin-bottom:12px;border-radius:12px;overflow:hidden;background:white;padding:10px;text-align:center;min-height:60px;">
+          <div style="color:#A5B4FC;font-size:13px;font-weight:600;padding:1rem;">Loading diagram...</div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px;">
+          <span style="font-size:22px;flex-shrink:0;">🎓</span>
+          <p style="font-size:13px;font-weight:600;color:#312E81;line-height:1.7;margin:0;">${info.how_it_works}</p>
+        </div>
+      </div>` : ''}
+    </div>`;
+}
+</script>
+</body>
+</html>
